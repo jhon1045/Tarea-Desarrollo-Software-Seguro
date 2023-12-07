@@ -91,4 +91,47 @@ router.get('/', [validarJWT], async function(req, resp){
         resp.status(500).send('Ocurrio un error')
     }
 });
+
+router.put('/:inventarioId', [validarJWT, validarRolAsmin], [check('modelo', 'invalid.modelo').not().isEmail(),
+    check('descripcion', 'invalid.descripcion').not().isEmpty(),], async function(req, resp) {
+
+    try{
+
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            return resp.status(400).json({ mensaje : errors.array()});
+        }
+
+
+        let inventario = await Inventario.findById(req.params.inventarioId);
+
+        if(!inventario){
+            return resp.status(400).send('Marca No Existe');
+        }
+        inventario.serial = req.body.serial;
+        inventario.nombre = req.body.nombre;
+        inventario.estado = req.body.estado;
+        inventario.modelo = req.body.modelo;
+        inventario.descripcion = req.body.descripcion;
+        inventario.color = req.body.color;
+        inventario.foto = req.body.foto;
+        inventario.fechaCompra = req.body.fechaCompra;
+        inventario.precio = req.body.precio;
+        inventario.usuario = req.body.usuario._id;
+        inventario.marca = req.body.marca._id;
+        inventario.estadoEquipo = req.body.estadoEquipo._id;
+        inventario.tipoEquipo = req.body.tipoEquipo._id;
+        inventario.fechaActualizacion = new Date();
+
+        inventario = await inventario.save();
+
+        resp.send(inventario);
+
+    } catch(error) {
+
+        console.log(error)
+    }
+
+});
+
 module.exports = router;
